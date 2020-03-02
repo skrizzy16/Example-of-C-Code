@@ -1,0 +1,139 @@
+/* ------------------------------------------------------------------------------------
+Program file: jskrzypp2.c
+Author: Jeff Skrzypczak
+Date: February 16 2020
+Assignment: #2
+Objective: This program takes input from the user in the form of dates from 01/01/1900 and above
+and returns the day of the week. If the user enters an invalid date, the user will be prompted
+to re enter a date that is correct.
+------------------------------------------------------------------------------------ */
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+
+int calc_date_number(int m, int d, int y)
+{
+    /* Section on N date calculation*/
+    long int n;
+
+    if (m <= 2) {
+        n = (((1461 * (y - 1)) / 4) + ((153 * (m + 13)) / 5) + d);
+    }  /*Formula for calculating "n" per the textbook if the month is jan or february*/
+    else {
+        n = (((1461 * (y)) / 4) + ((153 * (m + 1)) / 5) + d);
+    } /*Formula for calculating "n" per the textbook if the month is any month other than jan or february*/
+
+
+    if (y == 1900 && m < 3) {
+        n = n + 1;
+    }  /*If it is 1900 and jan or february 1 needs to be added to n per the textbook.*/
+
+    return n;
+}
+
+
+int calc_day_number(n) 
+{
+    int numeric_day_of_week;
+    numeric_day_of_week = ((n - 621049) % 7);
+    return numeric_day_of_week;
+}
+
+
+int display_day_of_week(numeric_day_of_week) 
+{
+    char* days[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+    int          day_to_print;
+    day_to_print = days[numeric_day_of_week];
+    return day_to_print;
+
+}
+
+
+int main(void)
+{
+	/*Intro statement.*/
+	printf("Welcome to the Date to Day-of-Week program. \n\n");
+	printf("The program will give you the day of the week for any date from 1/1/1900 \n\n");
+
+    /*variable declaration and structure declaration for main*/
+
+    struct date
+    {
+        int month;
+        int day;
+        int year;
+    };
+
+    struct date  user_input;
+    long int     n;
+    const int    days_per_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    int          numeric_day_of_week;
+    int          leap_year;
+    int          day_to_print;
+    int          days_per_month_return_value;
+    char         c;
+    
+    /*Do+while loop that prompts the user for data in the format of the date structure above. Contains a test for leap year to see if 02/29 is valid
+    depending on the year. Contains input validation around user entry for month, year and day.*/
+
+    do
+    {
+        /*user prompted to enter date.*/
+        printf("Enter date (mm/dd/yyyy): ");
+        scanf("%d/%d/%d", &user_input.month, &user_input.day, &user_input.year);
+        while ((c = getchar() != '\n') && c != EOF);
+
+        /*Leap Year Checker*/
+
+        if (user_input.year % 4 == 0 && user_input.year % 100 != 0 || user_input.year % 400 == 0) {
+            leap_year = 1;
+        }  /*end if. test to see if its a leap year. if so, assign a value of "1" to leap year.*/
+        else {
+            leap_year = 0;
+        }  /*end else. if not a leap year assigns a value of "0" to leap year.*/
+
+        /*Leap year adjustment day checker*/
+        if (leap_year == 1 && user_input.month == 2) {
+            days_per_month_return_value = 29;
+        }   /*If it is a leap year and february makes the number of days in the month 29 as opposed to 28*/
+        else {
+            days_per_month_return_value = days_per_month[user_input.month - 1];
+        } /*if not a leap year, OR a leap year and not february use the days in the const int "days_per_month[12]" above.*/
+
+        /*Input Validation*/
+
+        if (user_input.month < 1 || user_input.month > 12) {
+            printf("Invalid month. Please re-enter date.\n\n");
+        } /*if month is less than 1 or more than 12 user is prompted to re-enter date.*/
+        
+        else if (user_input.year < 1900) {
+            printf("Invalid year. Please re-enter date. Year must be greater than 1900.\n\n");
+        } /*if year is less than 1900 user is prompted to re-enter date*/
+
+        else if ((user_input.day < 1 || user_input.day > days_per_month_return_value)){
+            printf("Invalid day. Please re-enter date.\n\n");
+        } /*If day is less than 1 or greater than the maximum value of the month user is promprted to re-enter date.*/
+
+    } while (user_input.month < 1 || user_input.month > 12 || user_input.year < 1900 || user_input.day < 1 || user_input.day > days_per_month_return_value);
+    /*end do/while loop.*/
+
+
+
+    /*function used to calculate "n" with the function "calc_date_number"  based on input the user enters above.*/
+    n = calc_date_number(user_input.month, user_input.day, user_input.year);
+
+    /*function used to calculate "numeric_day_of_week" with the function "calc_day_number". This number is from 0 to 6 and signifies day of week
+    For example, 0 is sunday, 1 is monday, 2 is tuesday etc.*/
+    numeric_day_of_week = calc_day_number(n);
+
+    /*function used to calculate "day_to_print" with the function "display_day_of_week". Does a lookup essentially with a pointer for "0" to return "Sunday"*/
+    day_to_print = display_day_of_week(numeric_day_of_week);
+  
+
+	/*print results and exit statement.*/
+	printf("%.2i/%.2i/%i falls on a %s.\n\n",user_input.month, user_input.day, user_input.year, day_to_print);
+	printf("Thank you for using the Date to Day-of-Week program.\n");
+
+
+} /*end main*/
